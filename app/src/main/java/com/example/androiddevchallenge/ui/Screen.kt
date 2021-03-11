@@ -29,6 +29,9 @@ data class ItemData(
     val drawAction: DrawScope.() -> Any,
 )
 
+val circleRadius = 12.dp
+val circleSize = 24.dp
+
 @Composable
 fun Screen(
 ) {
@@ -64,7 +67,7 @@ fun Item(
 @Composable
 fun StraightLine() {
     Column {
-        var offsetStart by remember { mutableStateOf(IntOffset(100,100)) }
+        var offsetStart by remember { mutableStateOf(IntOffset(100, 100)) }
         var offsetEnd by remember { mutableStateOf(IntOffset(200, 200)) }
 
         Text(text = "Line")
@@ -98,7 +101,9 @@ fun StraightLine() {
                 .aspectRatio(1f)
 
         ) {
-            Canvas(modifier = Modifier.fillMaxSize().background(Color.Gray), onDraw = {
+            Canvas(modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Gray), onDraw = {
                 val (x1, y1) = offsetStart
                 val (x2, y2) = offsetEnd
                 drawLine(
@@ -111,8 +116,13 @@ fun StraightLine() {
             })
             // Control 1
             Box(modifier = Modifier
-                .offset { offsetStart }
-                .size(24.dp)
+                .offset {
+                    offsetStart - IntOffset(
+                        circleRadius.roundToPx(),
+                        circleRadius.roundToPx()
+                    )
+                }
+                .size(circleSize)
                 .background(color = Color.Red, CircleShape)
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
@@ -125,8 +135,13 @@ fun StraightLine() {
                 })
             // Control 2
             Box(modifier = Modifier
-                .offset { offsetEnd }
-                .size(24.dp)
+                .offset {
+                    offsetEnd - IntOffset(
+                        circleRadius.roundToPx(),
+                        circleRadius.roundToPx()
+                    )
+                }
+                .size(circleSize)
                 .background(color = Color.Red, CircleShape)
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
