@@ -10,12 +10,9 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.input.KeyboardType
@@ -23,13 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.example.androiddevchallenge.ui.theme.typography
 import kotlin.math.roundToInt
-
-data class ItemData(
-    val title: String,
-    val description: String,
-    val drawAction: DrawScope.() -> Any,
-)
 
 val circleRadius = 12.dp
 val circleSize = 24.dp
@@ -40,60 +32,37 @@ fun Screen(
     StraightLine()
 }
 
-@Composable
-fun Item(
-    title: String,
-    description: String,
-    drawAction: DrawScope.() -> Any = {},
-    headerControls: @Composable () -> Unit = {},
-) {
-    Column {
-        Text(text = title)
-        Text(text = description)
-        headerControls()
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
-            .background(Color.Black)
-            .padding(16.dp)
-            .drawBehind {
-                drawAction()
-            }) {
-
-        }
-    }
-
-}
-
 @Preview
 @Composable
 fun StraightLine() {
-    Column {
+    Column(Modifier.padding(16.dp)) {
         var offsetStart by remember { mutableStateOf(IntOffset(100, 100)) }
         var offsetEnd by remember { mutableStateOf(IntOffset(200, 200)) }
 
-        Text(text = "Line")
-        Text(text = "Just a line")
-        OutlinedTextField(
-            value = offsetStart.x.toString(),
-            onValueChange = { offsetStart = offsetStart.copy(x = it.toInt()) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-        OutlinedTextField(
-            value = offsetStart.y.toString(),
-            onValueChange = { offsetStart = offsetStart.copy(x = it.toInt()) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-        OutlinedTextField(
-            value = offsetEnd.x.toString(),
-            onValueChange = { offsetEnd = offsetEnd.copy(x = it.toInt()) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-        OutlinedTextField(
-            value = offsetEnd.y.toString(),
-            onValueChange = { offsetEnd = offsetEnd.copy(y = it.toInt()) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
+        Text(text = "Line", style = typography.h4)
+        Text(text = "Just a line", style = typography.body1)
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+            ControlTextField(
+                value = offsetStart.x.toString(),
+                onValueChange = { offsetStart = offsetStart.copy(x = it.toInt()) },
+                label = { Text("start x") },
+            )
+            ControlTextField(
+                value = offsetStart.y.toString(),
+                label = { Text("start y") },
+                onValueChange = { offsetStart = offsetStart.copy(x = it.toInt()) },
+            )
+            ControlTextField(
+                value = offsetEnd.x.toString(),
+                label = { Text("end x") },
+                onValueChange = { offsetEnd = offsetEnd.copy(x = it.toInt()) },
+            )
+            ControlTextField(
+                value = offsetEnd.y.toString(),
+                label = { Text("end y") },
+                onValueChange = { offsetEnd = offsetEnd.copy(y = it.toInt()) },
+            )
+        }
 
         Box(
             modifier = Modifier
@@ -131,6 +100,21 @@ fun StraightLine() {
         }
     }
 
+}
+
+@Composable
+fun ControlTextField(
+    label: @Composable (() -> Unit)? = null,
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = { onValueChange(it) },
+        label = label,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        modifier = Modifier.width(80.dp)
+    )
 }
 
 @Composable
