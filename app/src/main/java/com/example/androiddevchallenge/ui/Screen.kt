@@ -15,10 +15,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
@@ -114,45 +116,46 @@ fun StraightLine() {
                     cap = StrokeCap.Round
                 )
             })
-            // Control 1
-            Box(modifier = Modifier
-                .offset {
-                    offsetStart - IntOffset(
-                        circleRadius.roundToPx(),
-                        circleRadius.roundToPx()
-                    )
-                }
-                .size(circleSize)
-                .background(color = Color.Red, CircleShape)
-                .pointerInput(Unit) {
-                    detectDragGestures { change, dragAmount ->
-                        change.consumeAllChanges()
-                        offsetStart += IntOffset(
-                            dragAmount.x.roundToInt(),
-                            dragAmount.y.roundToInt()
-                        )
-                    }
-                })
-            // Control 2
-            Box(modifier = Modifier
-                .offset {
-                    offsetEnd - IntOffset(
-                        circleRadius.roundToPx(),
-                        circleRadius.roundToPx()
-                    )
-                }
-                .size(circleSize)
-                .background(color = Color.Red, CircleShape)
-                .pointerInput(Unit) {
-                    detectDragGestures { change, dragAmount ->
-                        change.consumeAllChanges()
-                        offsetEnd += IntOffset(
-                            dragAmount.x.roundToInt(),
-                            dragAmount.y.roundToInt()
-                        )
 
-                    }
+            ControlPoint(
+                offset = { offsetStart },
+                onOffsetChange = {
+                    offsetStart += it
+                })
+
+            ControlPoint(
+                offset = { offsetEnd },
+                onOffsetChange = {
+                    offsetEnd += it
                 })
         }
     }
+
+}
+
+@Composable
+fun ControlPoint(
+    offset: Density.() -> IntOffset,
+    onOffsetChange: (IntOffset) -> Unit,
+) {
+    Box(modifier = Modifier
+        .offset {
+            offset() - IntOffset(
+                circleRadius.roundToPx(),
+                circleRadius.roundToPx()
+            )
+        }
+        .size(circleSize)
+        .background(color = Color.Red, CircleShape)
+        .pointerInput(Unit) {
+            detectDragGestures { change, dragAmount ->
+                change.consumeAllChanges()
+                onOffsetChange(
+                    IntOffset(
+                        dragAmount.x.roundToInt(),
+                        dragAmount.y.roundToInt()
+                    )
+                )
+            }
+        })
 }
