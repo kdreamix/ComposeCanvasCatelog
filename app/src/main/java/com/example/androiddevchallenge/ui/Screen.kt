@@ -15,8 +15,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -36,6 +38,7 @@ fun Screen(
 @Composable
 fun StraightLine() {
     Column(Modifier.padding(16.dp)) {
+
         var offsetStart by remember { mutableStateOf(IntOffset(100, 100)) }
         var offsetEnd by remember { mutableStateOf(IntOffset(200, 200)) }
 
@@ -50,7 +53,7 @@ fun StraightLine() {
             ControlTextField(
                 value = offsetStart.y.toString(),
                 label = { Text("start y") },
-                onValueChange = { offsetStart = offsetStart.copy(x = it.toInt()) },
+                onValueChange = { offsetStart = offsetStart.copy(y = it.toInt()) },
             )
             ControlTextField(
                 value = offsetEnd.x.toString(),
@@ -72,9 +75,13 @@ fun StraightLine() {
                 .aspectRatio(1f)
 
         ) {
+            var maxWidth by remember { mutableStateOf(0) }
+            var maxHeight by remember { mutableStateOf(0) }
             Canvas(modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Gray), onDraw = {
+                maxWidth = drawContext.size.width.roundToInt()
+                maxHeight = drawContext.size.height.roundToInt()
                 val (x1, y1) = offsetStart
                 val (x2, y2) = offsetEnd
                 drawLine(
@@ -89,13 +96,19 @@ fun StraightLine() {
             ControlPoint(
                 offset = { offsetStart },
                 onOffsetChange = {
-                    offsetStart += it
+                    val (x, y) = it
+                    val newX = (x + offsetStart.x).coerceIn(0,maxWidth)
+                    val newY = (y + offsetStart.y).coerceIn(0,maxHeight)
+                    offsetStart = IntOffset(newX, newY)
                 })
 
             ControlPoint(
                 offset = { offsetEnd },
                 onOffsetChange = {
-                    offsetEnd += it
+                    val (x, y) = it
+                    val newX = (x + offsetEnd.x).coerceIn(0,maxWidth)
+                    val newY = (y + offsetEnd.y).coerceIn(0,maxWidth)
+                    offsetEnd = IntOffset(newX, newY)
                 })
         }
     }
