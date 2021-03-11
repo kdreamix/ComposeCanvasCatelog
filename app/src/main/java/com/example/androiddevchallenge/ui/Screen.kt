@@ -1,11 +1,11 @@
 package com.example.androiddevchallenge.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -15,9 +15,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.input.pointer.consumeAllChanges
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 
 data class ItemData(
     val title: String,
@@ -56,45 +60,84 @@ fun Item(
 
 }
 
+@Preview
 @Composable
 fun StraightLine() {
     Column {
-        var offsetStart by remember { mutableStateOf(Offset.Zero) }
-        var offsetEnd by remember { mutableStateOf(Offset(100f, 100f)) }
+        var offsetStart by remember { mutableStateOf(IntOffset(100,100)) }
+        var offsetEnd by remember { mutableStateOf(IntOffset(200, 200)) }
 
         Text(text = "Line")
         Text(text = "Just a line")
         OutlinedTextField(
             value = offsetStart.x.toString(),
-            onValueChange = { offsetStart = offsetStart.copy(x = it.toFloat()) },
+            onValueChange = { offsetStart = offsetStart.copy(x = it.toInt()) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         OutlinedTextField(
             value = offsetStart.y.toString(),
-            onValueChange = { offsetStart = offsetStart.copy(x = it.toFloat()) },
+            onValueChange = { offsetStart = offsetStart.copy(x = it.toInt()) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         OutlinedTextField(
             value = offsetEnd.x.toString(),
-            onValueChange = { offsetEnd = offsetEnd.copy(x = it.toFloat()) },
+            onValueChange = { offsetEnd = offsetEnd.copy(x = it.toInt()) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         OutlinedTextField(
             value = offsetEnd.y.toString(),
-            onValueChange = { offsetEnd = offsetEnd.copy(y = it.toFloat()) },
+            onValueChange = { offsetEnd = offsetEnd.copy(y = it.toInt()) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
-            .background(Color.Black)
-            .padding(16.dp)
-            .drawBehind {
-                val width = this.drawContext.size.width
-                val height = this.drawContext.size.height
-                drawLine(Color.White, offsetStart, offsetEnd,strokeWidth = 16.dp.toPx(),cap = StrokeCap.Round)
-            }) {
 
+        Box(
+            modifier = Modifier
+                .background(Color.Black)
+                .padding(16.dp)
+                .fillMaxWidth()
+                .aspectRatio(1f)
+
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize().background(Color.Gray), onDraw = {
+                val (x1, y1) = offsetStart
+                val (x2, y2) = offsetEnd
+                drawLine(
+                    Color.White,
+                    Offset(x1.toFloat(), y1.toFloat()),
+                    Offset(x2.toFloat(), y2.toFloat()),
+                    strokeWidth = 16.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            })
+            // Control 1
+            Box(modifier = Modifier
+                .offset { offsetStart }
+                .size(24.dp)
+                .background(color = Color.Red, CircleShape)
+                .pointerInput(Unit) {
+                    detectDragGestures { change, dragAmount ->
+                        change.consumeAllChanges()
+                        offsetStart += IntOffset(
+                            dragAmount.x.roundToInt(),
+                            dragAmount.y.roundToInt()
+                        )
+                    }
+                })
+            // Control 2
+            Box(modifier = Modifier
+                .offset { offsetEnd }
+                .size(24.dp)
+                .background(color = Color.Red, CircleShape)
+                .pointerInput(Unit) {
+                    detectDragGestures { change, dragAmount ->
+                        change.consumeAllChanges()
+                        offsetEnd += IntOffset(
+                            dragAmount.x.roundToInt(),
+                            dragAmount.y.roundToInt()
+                        )
+
+                    }
+                })
         }
     }
 }
